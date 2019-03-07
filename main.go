@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -23,9 +24,26 @@ type pairInfo struct {
 }
 
 func main() {
-	root := "/home/egorse"
-	size := int64(100000)
+	//
+	// Command line arguments
+	//
+	root, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	size := int64(1000000)
 	noname := false
+	ignore := ".git"
+	flag.BoolVar(&noname, "noname", false, "Disable filename match check")
+	flag.Int64Var(&size, "size", 1000000, "Minimum file size")
+	flag.StringVar(&ignore, "ignore", ".git", "Directory to ignore")
+	flag.Parse()
+	args := flag.Args()
+	if len(args) == 1 {
+		root = args[0]
+	} else if len(args) > 1 {
+		panic(args)
+	}
 
 	//
 	// Traversal filesystem
@@ -49,7 +67,7 @@ func main() {
 		// TODO Check if symlinks need some special treatment
 		if info.IsDir() {
 			name := info.Name()
-			if name == ".git" { // skip by name
+			if name == ignore { // skip by name
 				return walk.SkipDir
 			}
 
