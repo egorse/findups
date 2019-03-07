@@ -23,6 +23,8 @@ type pairInfo struct {
 	f2 *fileInfo
 }
 
+var verbose = false
+
 func main() {
 	//
 	// Command line arguments
@@ -34,6 +36,7 @@ func main() {
 	size := int64(1000000)
 	noname := false
 	ignore := ".git"
+	flag.BoolVar(&verbose, "v", false, "Verbose output")
 	flag.BoolVar(&noname, "noname", false, "Disable filename match check")
 	flag.Int64Var(&size, "size", 1000000, "Minimum file size")
 	flag.StringVar(&ignore, "ignore", ".git", "Directory to ignore")
@@ -90,6 +93,14 @@ func main() {
 	}
 
 	log.Printf("walking over %s", root)
+	if ignore != "" {
+		log.Printf("ignore %s", ignore)
+	}
+	log.Printf("limit file size more or equal %v", size)
+	if noname {
+		log.Printf("do not compare file names")
+	}
+
 	if err := walk.Walk(root, walkFn); err != nil {
 		log.Fatal(err)
 	}
@@ -176,13 +187,13 @@ func main() {
 		return groups[i][0].size > groups[j][0].size
 	})
 	for _, g := range groups {
-		fmt.Printf("%v x%d %v\n", g[0].size, len(g), g[0].path)
+		fmt.Printf("# %s %v x%d\n", g[0].path, g[0].size, len(g))
 
 		s := ""
 		for _, f := range g[1:] {
 			s = s + fmt.Sprintf("%s ", f.path)
 		}
-		fmt.Printf("!%s\n", s)
+		fmt.Printf("- %s\n", s)
 	}
 
 	log.Printf("done!")

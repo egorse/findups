@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha1"
 	"io"
+	"log"
 	"os"
 )
 
@@ -15,9 +16,14 @@ func Hash(path string) ([]byte, error) {
 	defer f.Close()
 
 	h := sha1.New()
-	if _, err := io.Copy(h, f); err != nil {
+	buf := make([]byte, 1*1024*1024)
+	if _, err := io.CopyBuffer(h, f, buf); err != nil {
 		return nil, err
 	}
 
-	return h.Sum(nil), nil
+	sum := h.Sum(nil)
+	if verbose {
+		log.Printf("%x  %v\n", sum, path)
+	}
+	return sum, nil
 }

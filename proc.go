@@ -16,8 +16,8 @@ func Proc(fn func(chan interface{}), n ...int) (chan interface{}, func()) {
 
 	wg := sync.WaitGroup{}
 	for i := 0; i < m; i++ {
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			defer wg.Done()
 			fn(ch)
 		}()
